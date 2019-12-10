@@ -10,6 +10,7 @@ namespace DependencyInjectionContainer
     public class DependencyConfiguration
     {
         private readonly Dictionary<Type, List<ConfiguratedType>> _configuration;
+        public IDictionary<Type, List<ConfiguratedType>> Configuration => _configuration;
 
         public DependencyConfiguration()
         {
@@ -72,6 +73,11 @@ namespace DependencyInjectionContainer
             {
                 throw new Exception($"{TImplementation.ToString()} can't be added with {TInterface.ToString()}");
             }
+        }
+
+        public ConfiguratedType GetConfiguratedType(Type TInterface)
+        {
+            return _configuration.TryGetValue(TInterface, out var configuratedTypes) ? configuratedTypes.Last() : null;
         }
     }
 }

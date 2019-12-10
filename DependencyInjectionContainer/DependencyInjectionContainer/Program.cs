@@ -15,6 +15,11 @@ namespace DependencyInjectionContainer
     {
         bool b;
 
+        public A(bool k)
+        {
+            b = k;
+        }
+
         public string GetMe()
         {
             return "A";
@@ -27,6 +32,14 @@ namespace DependencyInjectionContainer
         {
             DependencyConfiguration dc = new DependencyConfiguration();
             dc.Register<AInterface, A>();
+//            dc.Register<A, A>();
+            DependencyProvider dp = new DependencyProvider(dc);
+
+            var b = typeof(A).IsGenericType;
+
+            var k = dp.Resolve<AInterface>();
+            Console.WriteLine(k.GetMe());
+            Console.ReadLine();
         }
     }
 }
