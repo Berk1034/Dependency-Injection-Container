@@ -20,6 +20,7 @@ namespace DependencyInjectionContainer
             return "A";
         }
     }
+
     class Program
     {
         static void Main(string[] args)

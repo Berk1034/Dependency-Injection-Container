@@ -16,12 +16,15 @@ namespace DependencyInjectionContainer
             _configuration = new Dictionary<Type, List<ConfiguratedType>>();
         }
 
-        public void Register<TImplementation>()
+        public void Register<TImplementation>() 
+            where TImplementation : class
         {
             RegisterType(typeof(TImplementation), typeof(TImplementation));
         }
 
-        public void Register<TInterface, TImplementation>()
+        public void Register<TInterface, TImplementation>() 
+            where TInterface : class 
+            where TImplementation : class
         {
             RegisterType(typeof(TInterface), typeof(TImplementation));
         }
@@ -32,11 +35,14 @@ namespace DependencyInjectionContainer
         }
 
         public void RegisterSingleton<TImplementation>()
+            where TImplementation : class
         {
             RegisterType(typeof(TImplementation), typeof(TImplementation), true);
         }
 
         public void RegisterSingleton<TInterface, TImplementation>()
+            where TInterface : class
+            where TImplementation : class
         {
             RegisterType(typeof(TInterface), typeof(TImplementation), true);
         }
@@ -48,8 +54,24 @@ namespace DependencyInjectionContainer
 
         public void RegisterType(Type TInterface, Type TImplementation, bool isSingleton = false)
         {
-            ConfiguratedType configuratedType = new ConfiguratedType(TInterface, TImplementation, isSingleton);
-            _configuration.Add(TInterface, new List<ConfiguratedType>() { configuratedType });
+            if (!TImplementation.IsInterface && !TImplementation.IsAbstract && TInterface.IsAssignableFrom(TImplementation))
+            {
+                ConfiguratedType configuratedType = new ConfiguratedType(TInterface, TImplementation, isSingleton);
+
+                if (_configuration.ContainsKey(TInterface))
+                {
+                    _configuration[TInterface].Add(configuratedType);
+                }
+                else
+                {
+                    _configuration.Add(TInterface, new List<ConfiguratedType> { configuratedType });
+                }
+
+            }
+            else
+            {
+                throw new Exception($"{TImplementation.ToString()} can't be added with {TInterface.ToString()}");
+            }
         }
     }
 }

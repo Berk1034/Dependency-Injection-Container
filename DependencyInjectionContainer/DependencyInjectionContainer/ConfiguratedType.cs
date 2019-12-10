@@ -16,10 +16,10 @@ namespace DependencyInjectionContainer
 
         public object Instance { get; set; }
 
-        public ConfiguratedType(Type implementation, Type interf, bool isSingleton = false)
+        public ConfiguratedType(Type interf, Type implementation, bool isSingleton = false)
         {
-            Implementation = implementation;
             ImplementationInterface = interf;
+            Implementation = implementation;
             IsSingleton = isSingleton;
             Instance = null;
         }
