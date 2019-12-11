@@ -24,7 +24,7 @@ namespace DependencyInjectionContainerLibrary
 
         public void Register<TInterface, TImplementation>()
             where TInterface : class
-            where TImplementation : class
+            where TImplementation : class, TInterface
         {
             RegisterType(typeof(TInterface), typeof(TImplementation));
         }
@@ -42,7 +42,7 @@ namespace DependencyInjectionContainerLibrary
 
         public void RegisterSingleton<TInterface, TImplementation>()
             where TInterface : class
-            where TImplementation : class
+            where TImplementation : class, TInterface
         {
             RegisterType(typeof(TInterface), typeof(TImplementation), true);
         }

@@ -150,7 +150,6 @@ namespace DependencyInjectionContainerLibrary
             }
         }
 
-
         private object CreateIEnumerable(Type type)
         {
             var configuratedType = dependencyConfiguration.GetConfiguratedType(type);

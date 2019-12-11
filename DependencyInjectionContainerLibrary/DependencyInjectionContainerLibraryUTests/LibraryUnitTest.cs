@@ -34,7 +34,7 @@ namespace DependencyInjectionContainerLibraryUTests
             var bar1 = dependencyProvider.Resolve<AbstractBar>();
             var bar2 = dependencyProvider.Resolve<AbstractBar>();
 
-            Assert.AreEqual(bar1, bar2);
+            Assert.AreSame(bar1, bar2);
         }
 
         [TestMethod]
@@ -90,6 +90,20 @@ namespace DependencyInjectionContainerLibraryUTests
 
             Assert.IsNotNull(foo);
             Assert.AreEqual(typeof(FooFromInterface), foo.GetType());
+        }
+
+        [TestMethod]
+        public void ShouldAvoidCycle()
+        {
+            DependencyConfiguration dependencyConfiguration = new DependencyConfiguration();
+            dependencyConfiguration.Register<AInterface, A>();
+            dependencyConfiguration.Register<BInterface, B>();
+
+            DependencyProvider dependencyProvider = new DependencyProvider(dependencyConfiguration);
+
+            var A = dependencyProvider.Resolve<AInterface>();
+
+            Assert.IsNotNull(A);
         }
 
         [TestMethod]
