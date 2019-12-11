@@ -14,6 +14,7 @@ namespace DependencyInjectionContainer
         private readonly DependencyConfiguration dependencyConfiguration;
         private readonly ConcurrentStack<Type> Implementations;
         private static readonly object syncRoot = new object();
+        private Type _currentGenType;
 
         public DependencyProvider(DependencyConfiguration dependencyConfiguration)
         {
@@ -63,6 +64,7 @@ namespace DependencyInjectionContainer
 
             if (configuratedType != null)
             {
+                _currentGenType = type;
                 return (T)GetOrCreateInstance(configuratedType);
             }
             else
@@ -93,7 +95,14 @@ namespace DependencyInjectionContainer
                 {
                     Implementations.Push(configuratedType.Implementation);
 
-                    ConstructorInfo[] constructors = configuratedType.Implementation.GetConstructors().OrderByDescending(x => x.GetParameters().Length).ToArray();
+                    var instanceType = configuratedType.Implementation;
+
+                    if (instanceType.IsGenericTypeDefinition)
+                    {
+                        instanceType = instanceType.MakeGenericType(_currentGenType.GenericTypeArguments);
+                    }
+
+                    ConstructorInfo[] constructors = instanceType.GetConstructors().OrderByDescending(x => x.GetParameters().Length).ToArray();
 
                     object result = null;
 
@@ -106,7 +115,7 @@ namespace DependencyInjectionContainer
                         {
                             ConstructorInfo useConstructor = constructors[ctorNum - 1];
                             object[] parameters = GetConstructorParams(useConstructor);
-                            result = Activator.CreateInstance(configuratedType.Implementation, parameters);
+                            result = Activator.CreateInstance(instanceType, parameters);
                             isCreated = true;
                         }
                         catch
