@@ -6,23 +6,41 @@ using System.Threading.Tasks;
 
 namespace DependencyInjectionContainer
 {
-    public interface AInterface
+    public interface IFoo { }
+
+    public interface IBar { }
+
+    public abstract class ABar : IBar { }
+
+    public class BarFromIBar : IBar
     {
-        string GetMe();
+        IFoo foo;
+        public BarFromIBar(IFoo foo)
+        {
+            this.foo = foo;
+        }
     }
 
-    public class A : AInterface
+    public class BarFromABar : ABar
     {
-        bool b;
 
-        public A(bool k)
+    }
+
+    public class Foo : IFoo
+    {
+        public ABar Bar { get; }
+        public Foo()
         {
-            b = k;
+            Console.WriteLine("I am Foo!");
         }
-
-        public string GetMe()
+        public Foo(bool k)
         {
-            return "A";
+            Console.WriteLine("I am Foo with bool!");
+        }
+        public Foo(ABar bar)
+        {
+            Bar = bar;
+            Console.WriteLine("I am Foo with ABar!");
         }
     }
 
@@ -31,14 +49,25 @@ namespace DependencyInjectionContainer
         static void Main(string[] args)
         {
             DependencyConfiguration dc = new DependencyConfiguration();
-            dc.Register<AInterface, A>();
-//            dc.Register<A, A>();
+
+            dc.Register<IBar, BarFromIBar>();
+            dc.Register<ABar, BarFromABar>();
+            dc.Register<IFoo, Foo>();
+
             DependencyProvider dp = new DependencyProvider(dc);
 
-            var b = typeof(A).IsGenericType;
+            var foo = dp.Resolve<IFoo>();
 
-            var k = dp.Resolve<AInterface>();
-            Console.WriteLine(k.GetMe());
+            DependencyConfiguration newDC = new DependencyConfiguration();
+
+            newDC.Register<IBar, BarFromIBar>();
+            newDC.Register<IBar, BarFromABar>();
+
+            DependencyProvider newDP = new DependencyProvider(newDC);
+            var bars = newDP.ResolveAll<IBar>();
+
+            Console.WriteLine(bars.Count());
+
             Console.ReadLine();
         }
     }

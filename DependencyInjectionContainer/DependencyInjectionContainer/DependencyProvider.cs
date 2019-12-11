@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,13 +30,13 @@ namespace DependencyInjectionContainer
 
         private bool Validate(DependencyConfiguration dependencyConfiguration)
         {
-            if(dependencyConfiguration != null)
+            if (dependencyConfiguration != null)
             {
-                foreach(var kvpair in dependencyConfiguration.Configuration)
+                foreach (var kvpair in dependencyConfiguration.Configuration)
                 {
-                    foreach(var confType in kvpair.Value)
+                    foreach (var confType in kvpair.Value)
                     {
-                        if (confType.Implementation.IsAbstract || confType.Implementation.IsInterface|| !confType.ImplementationInterface.IsAssignableFrom(confType.Implementation))
+                        if (confType.Implementation.IsAbstract || confType.Implementation.IsInterface || !confType.ImplementationInterface.IsAssignableFrom(confType.Implementation))
                         {
                             return false;
                         }
@@ -50,9 +51,15 @@ namespace DependencyInjectionContainer
         }
 
         public T Resolve<T>()
+            where T: class
         {
             var type = typeof(T);
             var configuratedType = dependencyConfiguration.GetConfiguratedType(type);
+
+            if(configuratedType == null && type.IsGenericType)
+            {
+                configuratedType = dependencyConfiguration.GetConfiguratedType(type.GetGenericTypeDefinition());
+            }
 
             if (configuratedType != null)
             {
@@ -63,6 +70,12 @@ namespace DependencyInjectionContainer
                 return default(T);
             }
 
+        }
+
+        public IEnumerable<T> ResolveAll<T>()
+            where T: class
+        {
+            return (IEnumerable<T>)CreateIEnumerable(typeof(T));
         }
 
         private object Create(Type type)
@@ -121,6 +134,28 @@ namespace DependencyInjectionContainer
                 {
                     return null;
                 }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        private object CreateIEnumerable(Type type)
+        {
+            var configuratedType = dependencyConfiguration.GetConfiguratedType(type);
+            if (configuratedType != null)
+            {
+                var collection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+
+                var configuratedTypes = dependencyConfiguration.GetConfiguratedTypes(type);
+                foreach(var confType in configuratedTypes)
+                {
+                    collection.Add(GetOrCreateInstance(confType));
+                }
+
+                return collection;
             }
             else
             {

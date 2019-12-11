@@ -79,5 +79,10 @@ namespace DependencyInjectionContainer
         {
             return _configuration.TryGetValue(TInterface, out var configuratedTypes) ? configuratedTypes.Last() : null;
         }
+
+        public IEnumerable<ConfiguratedType> GetConfiguratedTypes(Type TInterface)
+        {
+            return _configuration.TryGetValue(TInterface, out var configuratedTypes) ? configuratedTypes : null;
+        }
     }
 }
